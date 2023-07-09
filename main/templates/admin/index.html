@@ -1,0 +1,201 @@
+{% extends "admin/index.html" %}
+
+{% block extrahead %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        function numberToOrdinal(number) {
+            let ordinal = number.toString(); // Convert the number to a string
+
+            if (number % 10 === 1 && number % 100 !== 11) {
+                ordinal += 'st';
+            } else if (number % 10 === 2 && number % 100 !== 12) {
+                ordinal += 'nd';
+            } else if (number % 10 === 3 && number % 100 !== 13) {
+                ordinal += 'rd';
+            } else {
+                ordinal += 'th';
+            }
+
+            return ordinal;
+        }
+
+        async function getLastEventInfo() {
+            let response = await fetch("/last_event")
+            if (response.ok) return await response.json()
+            else return "No events ended yet."
+        }
+
+        let lastEventInfo = await getLastEventInfo()
+
+
+        if (typeof lastEventInfo == "object") {
+            const div = document.createElement("div")
+            div.innerHTML = `<b>Event name:</b> ${lastEventInfo["event_name"]}`
+            const table = document.createElement("table")
+            table.style = "width: 100%;"
+            const row = document.createElement("tr")
+            row.append(
+                document.createElement("th"),
+                Object.assign(document.createElement('th'), {textContent: "Candidate number"}),
+                Object.assign(document.createElement('th'), {textContent: "Name"}),
+                Object.assign(document.createElement('th'), {textContent: "Total score"})
+            )
+            table.append(row)
+            lastEventInfo["winners"].forEach((participant, i) => {
+                const row = document.createElement("tr")
+                row.append(
+                    Object.assign(document.createElement('th'), {textContent: (i == 0) ? 'Winner' : `${numberToOrdinal(i)} runner up`}),
+                    Object.assign(document.createElement('td'), {textContent: participant.candidate_number}),
+                    Object.assign(document.createElement('td'), {textContent: participant.name}),
+                    Object.assign(document.createElement('td'), {textContent: participant.total_score})
+                )
+                table.append(row)
+            });
+            const a = document.createElement("a")
+            a.style = "display: inline-block; padding: .5rem; border: none; cursor: pointer; border-radius: 4px; margin-top: 1rem; background-color: white; color: black;"
+            a.textContent = "Download info"
+            a.href = "/download"
+            const lastEventInfoDiv = document.querySelector("#last-event-info")
+            lastEventInfoDiv.style.borderBottom = "solid 1px gray"
+            lastEventInfoDiv.style.paddingBottom = "1rem"
+            lastEventInfoDiv.append(div, table, a)
+        }
+
+        async function getStats() {
+            let response = await fetch("/stats")
+            return await response.json()
+        }
+
+        let stats = await getStats()
+
+        // console.log(lastEventInfo)
+        // console.log(stats)
+
+
+        const usersChart = document.getElementById('usersChart')
+        const eventsChart = document.getElementById('eventsChart')
+        const participantsChart = document.getElementById('participantsChart')
+
+        new Chart(usersChart, {
+            type: "pie",
+            data: {
+                labels: stats["groups"].map((group) => group["name"]),
+                datasets: [{
+                    data: stats["groups"].map((group) => { 
+                        return stats["users"].filter((user) => user["groups__name"] == group["name"]).length
+                    }),
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Users (total: ${stats["users"].length})`
+                    }
+                }
+            }
+        })
+
+        let eventStatuses = ["active", "scheduled", "ended"]
+        new Chart(eventsChart, {
+            type: "pie",
+            data: {
+                labels: eventStatuses,
+                datasets: [{
+                    data: eventStatuses.map((status) => { 
+                        return stats["events"].filter((event) => event["status"] == status).length
+                    }),
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Events (total: ${stats["events"].length})`
+                    }
+                }
+            }
+        })
+
+        let genders = [["M", "male"], ["F", "female"]]
+        new Chart(participantsChart, {
+            type: "pie",
+            data: {
+                labels: genders.map((g) => g[1]),
+                datasets: [{
+                    data: genders.map((gender) => { 
+                        return stats["participants"].filter((participant) => participant["gender"] == gender[0]).length
+                    }),
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: `Participants (total: ${stats["participants"].length})`
+                    }
+                }
+            }
+        })
+
+    })
+</script>
+{% endblock %}
+
+{% block content %}
+    <div id="last-event-info" style="margin-bottom: 2rem; width: 93vw;">
+        <div 
+            style="
+                padding: 8px; 
+                background-color: #264B5D; 
+                font-size: .75rem;"
+        >
+            LAST EVENT INFO
+        </div>
+
+    </div>
+        
+    <div style="margin-bottom: 3rem; width: 93vw;">
+
+        <div 
+            style="
+                padding: 8px; 
+                background-color: #264B5D; 
+                font-size: .75rem;"
+        >
+            QUICK STATS
+        </div>
+        <div 
+            style="
+                display: flex; 
+                flex-wrap: wrap; 
+                justify-content: center; 
+                border-bottom: 1px solid gray; 
+                padding-bottom: 1rem;"
+        >
+            <div>
+                <canvas id="usersChart"></canvas>
+            </div>    
+            <div>
+                <canvas id="eventsChart"></canvas>
+            </div>
+            <div>
+                <canvas id="participantsChart"></canvas>
+            </div>
+        </div>
+    </div>        
+    {{ block.super }}
+{% endblock %}

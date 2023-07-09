@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+      "target": "es2017", // Set the target ECMAScript version here
+      "module": "commonjs", // Specify your module system (commonjs, esnext, etc.)
+      // Other necessary compiler options
+    },
+    "include": ["main/static/**/*.ts"], // Adjust this to match the path of your TypeScript source files
+    "exclude": ["node_modules"], // Exclude directories you don't want to be compiled
+    "watch": true
+  }
+  

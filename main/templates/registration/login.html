@@ -1,0 +1,35 @@
+{% extends "main/base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="bg-slate-950 max-w-md flex flex-col items-center mt-10 mx-auto gap-y-5 rounded p-5">
+    <span class="text-2xl font-bold text-white">Log in to your account</span>
+
+    <form 
+        action="{% url 'main:login' %}" 
+        method="post" 
+        class="flex flex-col gap-y-3 w-full"
+    >
+        {% csrf_token %}
+        {{ form }}
+        <input type="hidden" name="next" value="{{ next }}">
+        <input 
+            class="cursor-pointer bg-gray-600 rounded p-1 font-semibold text-white" 
+            type="submit" 
+            value="Log in"
+        >
+    </form>
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // document.querySelector(".errorlist").classList.add("text-white")
+    let labels = document.querySelectorAll("label")
+    labels.forEach((label) => label.classList.add("text-white"))
+    document.querySelector("#id_username").classList.add("rounded", "p-1");
+    document.querySelector("#id_password").classList.add("rounded", "p-1");
+</script>
+{% endblock %}

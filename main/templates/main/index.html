@@ -1,0 +1,71 @@
+{% extends "main/base.html" %}
+
+{% load static %}
+
+{% block content %}
+    <div class="flex flex-col gap-4">
+        {% if event %}
+
+            {% if is_judge_of_event %}
+                <div class="text-2xl font-bold text-slate-950 text-center">{{event.name}}</div>
+
+                <select
+                    id="round-select" 
+                    class="p-1 font-semibold rounded focus:border-slate-950 focus:ring-slate-950 text-center"
+                    onchange="handleRoundSelectChange(this)"
+                >
+                    {% for round in rounds %}
+                        <option 
+                            class="round-option"
+                            data-status="{{ round.status }}"
+                            data-id="{{ round.id }}"
+                        >
+                            {% if round.name %}
+                                {{ round.name }}
+                            {% else %}
+                                Round {{ round.number }}
+                            {% endif %}
+                            ({{ round.status }})
+                        </option>
+                    {% empty %}
+
+                    {% endfor %}
+                </select>
+                
+                <div class="flex flex-col gap-4 h-[85%]">
+                    <div class="bg-slate-950 p-3 rounded h-[30%] overflow-y-auto border border-slate-950">
+                        <div class="text-center text-l font-semibold text-white mb-3">Participants</div>
+                        <div 
+                            id="participant-list" 
+                            class="flex flex-col gap-1"
+                        >
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 rounded p-3 overflow-y-auto h-[70%]">
+                        <div class="text-center mb-3 text-l font-semibold text-white">Participant Panel</div>
+                        <div 
+                            id="participant-panel"
+                            class="flex flex-col gap-4 items-center text-white"
+                        >
+                        </div>
+                    </div>
+                </div>            
+
+            {% else %}
+                <div class="text-2xl font-bold text-center">
+                    You are not a judge of the event "{{event.name}}."
+                </div>
+            {% endif %}
+
+        {% else %}
+            <div class="text-2xl font-bold text-center">
+                There's no active event.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'main/js/index.js' %}"></script>
+{% endblock %}

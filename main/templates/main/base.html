@@ -1,0 +1,103 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'main/css/output.css' %}">
+    <style>
+        .errorlist {
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="h-screen">
+    <nav class="bg-slate-950 text-white shadow">
+        <div class="flex px-4 h-12 items-center">
+            <!-- Logo -->
+            <div class="text-xl grow font-bold">UDD DETS</div>
+            <!-- Wide screen menu -->
+            <div id="menu" class="hidden md:flex gap-3">
+                {% if user.is_authenticated %}
+                    <span class="hover:text-slate-300">Welcome {{ user.first_name }}!</span>
+                    <a class="hover:text-slate-300 font-semibold" href="{% url 'main:custom_logout' %}">Logout</a>
+                {% endif %}
+            </div>
+            <!-- Mobile menu button-->
+            <button 
+                id="menu-btn"
+                class="md:hidden cursor-pointer p-1 hover:bg-gray-600 rounded focus:outline focus:outline-2 focus:outline-white"
+            >
+                <!--
+                    Icon when menu is closed.
+                    Menu open: "hidden", Menu closed: "block"
+                -->
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke-width="1.5" 
+                    stroke="currentColor" 
+                    class="w-6 h-6"
+                >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <!--
+                    Icon when menu is open.
+                    Menu open: "block", Menu closed: "hidden"
+                -->
+                <svg 
+                    class="h-6 w-6 hidden" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke-width="1.5" 
+                    stroke="currentColor" 
+                    aria-hidden="true"
+                >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+        </div>
+        <!-- Mobile menu -->
+        <div 
+            id="mobile-menu" 
+            class="hidden flex-col gap-3 bg-slate-950 p-4 md:hidden"
+        >
+            {% if user.is_authenticated %}
+                <span class="hover:text-slate-300">Welcome {{ user.first_name }}!</span>
+                <a class="hover:text-slate-300 font-semibold" href="{% url 'main:custom_logout' %}">Logout</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="p-4 h-[93%]">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        const menuBtn = document.querySelector("#menu-btn")
+        const mobileMenu = document.querySelector("#mobile-menu")
+
+
+        menuBtn.onclick = () => {
+            menuBtn.querySelectorAll("svg").forEach((svg) => {
+                svg.classList.contains("hidden") ? svg.classList.remove("hidden") : svg.classList.add("hidden")
+            })
+            if (mobileMenu.classList.contains("hidden")) {
+                mobileMenu.classList.replace("hidden", "flex")
+            }
+            else {
+                mobileMenu.classList.replace("flex", "hidden")
+            }
+        }
+    </script>
+    {% block script %}{% endblock %}
+</body>
+
+</html>
